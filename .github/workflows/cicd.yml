@@ -64,6 +64,7 @@ jobs:
         
     - name: Unit Test Cases
       run: mvn test
+      
   Build_Project_and_Sonar_Scan:
     runs-on: self-hosted
     needs: test
@@ -79,6 +80,12 @@ jobs:
         
     - name: Unit Test Cases
       run: mvn package
+      
+    - name: Upload JAR Artifact
+    - uses: actions/upload-artifact@v4
+      with:
+        name: app-jar
+        path: target/*.jar
       
     - uses: actions/checkout@v4
       with:
@@ -104,7 +111,34 @@ jobs:
     - name: "Example show SonarQube Quality Gate Status value"
       run: echo "The Quality Gate status is ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}"
 
+  Build_docker_image_and_push:
+    runs-on: self-hosted
+    needs: Build_Project_and_Sonar_Scan
 
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download JAR artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: app-jar
+        path: app  # this will download JAR to ./app folder
+        
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ vars.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        push: true
+        tags: nutan921/app:latest
+     
+        
 
 
 
