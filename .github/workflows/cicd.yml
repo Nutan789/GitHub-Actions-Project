@@ -9,7 +9,7 @@ on:
 
 jobs:
   compile:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - uses: actions/checkout@v4
@@ -19,10 +19,16 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+        
+    - name: Maven Installation
+      run: sudo apt install maven -y
+      
     - name: Build with Maven
       run: mvn compile
+      
   security-check:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    needs: compile
 
     steps:
     - uses: actions/checkout@v4
