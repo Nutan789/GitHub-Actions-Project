@@ -138,6 +138,7 @@ jobs:
         context: .
         push: true
         tags: nutan921/app:latest
+        file: ./Dockerfile
      
         
 
